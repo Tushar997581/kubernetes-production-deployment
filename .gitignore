@@ -1,0 +1,24 @@
+﻿# Python virtual environments
+.venv/
+venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Environment variables and logs
+.env
+*.log
+
+# IDE and OS files
+.idea/
+.vscode/
+.DS_Store
+
+# Local Kubernetes secrets - never commit
+k8s/secret.yaml
+k8s/postgres-secret.yaml
+
+# Backup files
+*.backup

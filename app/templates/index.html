@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ app_name }}</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#0b1220;color:#e5e7eb;font:16px system-ui,sans-serif}
+    main{max-width:850px;margin:7vh auto;padding:28px}header{margin-bottom:26px}
+    .tag{color:#67e8f9;font-size:.85rem}h1{font-size:2rem;margin:.3rem 0}
+    .panel{background:#111c2f;border:1px solid #26364f;border-radius:16px;padding:22px}
+    form{display:flex;gap:10px;margin:16px 0}input{flex:1;min-width:0;padding:12px;border-radius:9px;border:1px solid #475569;background:#0b1220;color:white}
+    button{padding:11px 16px;border:0;border-radius:9px;background:#0891b2;color:white;font-weight:700;cursor:pointer}
+    li{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid #26364f}
+    li:last-child{border:0}.done{text-decoration:line-through;color:#94a3b8}.meta{color:#94a3b8;font-size:.85rem;margin-top:20px}
+    .status{display:inline-block;background:#064e3b;color:#a7f3d0;padding:5px 9px;border-radius:20px;font-size:.8rem}
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="tag">KUBERNETES PORTFOLIO PROJECT</div>
+    <h1>{{ app_name }}</h1>
+    <span class="status">Application online</span>
+  </header>
+  <section class="panel">
+    <h2>Deployment task board</h2>
+    <form id="task-form"><input id="title" placeholder="Add a DevOps task..." maxlength="120" required><button>Add task</button></form>
+    <ul id="tasks" style="list-style:none;padding:0"></ul>
+  </section>
+  <p class="meta">Environment: {{ environment }} · Version: {{ version }} · Metrics: <code>/metrics</code></p>
+</main>
+<script>
+async function loadTasks(){
+  const response=await fetch('/api/tasks'); const items=await response.json();
+  document.getElementById('tasks').innerHTML='';
+  items.forEach(task=>{
+    const li=document.createElement('li');
+    const checkbox=document.createElement('input'); checkbox.type='checkbox'; checkbox.checked=task.done;
+    checkbox.style.flex='0 0 auto';
+    checkbox.addEventListener('change',async()=>{await fetch('/api/tasks/'+task.id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({done:checkbox.checked})});loadTasks();});
+    const span=document.createElement('span'); span.textContent=task.title; if(task.done)span.className='done';
+    li.append(checkbox,span);document.getElementById('tasks').append(li);
+  });
+}
+document.getElementById('task-form').addEventListener('submit',async e=>{
+  e.preventDefault();const input=document.getElementById('title');
+  const response=await fetch('/api/tasks',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:input.value})});
+  if(response.ok){input.value='';loadTasks();}else{alert('Could not add task');}
+});
+loadTasks();
+</script>
+</body>
+</html>
